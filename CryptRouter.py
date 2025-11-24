@@ -658,6 +658,8 @@ def isExitChar(input):
         return True
     else:
         return False
+def roomNotInTopologyChar(input):
+    return input.strip().lower() == 'x'
 def roomTerms(input):
     start = {"s","start"}
     yellowCol = {"yc", "yellowcolumns"}
@@ -728,8 +730,9 @@ def roomTerms(input):
     else:
         return "invalid room"
 firstIteration = True
+foundInstance = False
 yesSet = {"y", "yes"}
-print("\nWelcome to Crypt-Router! Ver 1.02\n\nThis is a software to help you navigate your way throughout the Shadow Crypt Dungeon in DDO.\n")
+print("\nWelcome to Crypt-Router! Ver 1.03\n\nThis is a software to help you navigate your way throughout the Shadow Crypt Dungeon in DDO.\n")
 while True:
     needInstructions = False
     while firstIteration:
@@ -762,7 +765,7 @@ while True:
         
         print(welcStr)
     
-    while True:
+    while True and firstIteration:
         startInput = input("\n\nReady to Find your way? type 'yes' or 'y' if so & 'no' or 'n' if not.\n"+ orange("Enter Here: "))
         if(yesNoAssociation(startInput)):
             if startInput in yesSet:
@@ -773,73 +776,74 @@ while True:
         else:
             print("Invalid Input, please try again.")
     while True:
-        userKnowInstance = input("\nDo you know which instance you are in? type 'yes' or 'y' if so & 'no' or 'n' if not, or press enter to exit\n"+ orange("Enter Response: ")) # primary question for this while loop
-        flagDD = None # initialize as None
-        exitedInnerLoop = False
-        inInstance1 = False
-        inInstance2 = False
-        inInstance3 = False
-        isUnsure = False
-        wasUnsure = False
-        if yesNoAssociation(userKnowInstance): # checks to see if the response is a valid affirmative/negative response
-            userKnowInstance = userKnowInstance.strip().lower() # use to make case insensitive
-            while True: # use a while loop to loop back for mistaken instance responses
-                if userKnowInstance in yesSet: # basically, cannot proceed if they do not know their instance.
-                    flagDD = False # because we know our instance DD becomes irrelevant
-                    userInstance = input("\nWhich instance are you in? (r/g/b/red/green/blue) or press enter to exit\n"+ orange("Enter Response: ")) # primary questions for this while loop
-                    if instanceAssociation(userInstance): # verifies if any of the user's responses correlate to valid instances
-                        userInstance = userInstance.strip().lower() # use to make case insensitive
-                        # print(userInstance)
-                        # print(isinstance(userInstance, str))
-                        if userInstance == "r" or  userInstance == "red":
+        if not foundInstance:
+            userKnowInstance = input("\nDo you know which instance you are in? type 'yes' or 'y' if so & 'no' or 'n' if not, or press enter to exit\n"+ orange("Enter Response: ")) # primary question for this while loop
+            flagDD = None # initialize as None
+            exitedInnerLoop = False
+            inInstance1 = False
+            inInstance2 = False
+            inInstance3 = False
+            isUnsure = False
+            wasUnsure = False
+            if yesNoAssociation(userKnowInstance): # checks to see if the response is a valid affirmative/negative response
+                userKnowInstance = userKnowInstance.strip().lower() # use to make case insensitive
+                while True: # use a while loop to loop back for mistaken instance responses
+                    if userKnowInstance in yesSet: # basically, cannot proceed if they do not know their instance.
+                        flagDD = False # because we know our instance DD becomes irrelevant
+                        userInstance = input("\nWhich instance are you in? (r/g/b/red/green/blue) or press enter to exit\n"+ orange("Enter Response: ")) # primary questions for this while loop
+                        if instanceAssociation(userInstance): # verifies if any of the user's responses correlate to valid instances
+                            userInstance = userInstance.strip().lower() # use to make case insensitive
+                            # print(userInstance)
+                            # print(isinstance(userInstance, str))
+                            if userInstance == "r" or  userInstance == "red":
+                                if firstIteration:
+                                    initializeInstance1()
+                                inInstance1 = True
+                                # print("DEBUG: instance 1 initialized.")
+                                break # if valid instance, no need to continue while loop
+                            elif userInstance == "g" or userInstance ==  "green":
+                                if firstIteration:
+                                    initializeInstance2()
+                                inInstance2 = True
+                                # print("DEBUG: instance 2 initialized.")
+                                break # if valid instance, no need to continue while loop
+                            elif userInstance == "b" or userInstance == "blue":
+                                if firstIteration:
+                                    initializeInstance3()
+                                inInstance3 = True
+                                # print("DEBUG: instance 3 initialized.")
+                                break # if valid instance, no need to continue while loop
+                        elif isExitChar(userInstance):
+                            # let outter loop know that there was an exit within the inner loop so that the outter loop can automatically break
+                            sys.exit()
+                        else:
+                            print("please enter a valid instance")
+                            continue # if invalid instance, ask again for a valid instance
+                    else:
+                        userDD = input("\nDo you Have Death's Door charges or Dimension Door Spell? type 'yes' or 'y' if so & 'no' or 'n' if not, or press enter to exit\n"+ orange("Enter Response: ")) # allows for alternative to check instance ( returns player to starting room )
+                        if(yesNoAssociation(userDD) and userDD in yesSet):
+                            flagDD = True
+                            print("Please use Deaths Door/Dimension door to return to the starting room, and go east to learn which instance you are in.\n")
+                            break
+                        elif isExitChar(userDD):
+                            exitedInnerLoop = True
+                            break
+                        else:
+                            # initialize all 3 instances and offer them a path to try, if path does not properly get from A to B, then try next instance, and so on.
                             if firstIteration:
                                 initializeInstance1()
-                            inInstance1 = True
-                            # print("DEBUG: instance 1 initialized.")
-                            break # if valid instance, no need to continue while loop
-                        elif userInstance == "g" or userInstance ==  "green":
-                            if firstIteration:
                                 initializeInstance2()
-                            inInstance2 = True
-                            # print("DEBUG: instance 2 initialized.")
-                            break # if valid instance, no need to continue while loop
-                        elif userInstance == "b" or userInstance == "blue":
-                            if firstIteration:
                                 initializeInstance3()
-                            inInstance3 = True
-                            # print("DEBUG: instance 3 initialized.")
-                            break # if valid instance, no need to continue while loop
-                    elif isExitChar(userInstance):
-                        # let outter loop know that there was an exit within the inner loop so that the outter loop can automatically break
-                        sys.exit()
-                    else:
-                        print("please enter a valid instance")
-                        continue # if invalid instance, ask again for a valid instance
-                else:
-                    userDD = input("\nDo you Have Death's Door charges or Dimension Door Spell? type 'yes' or 'y' if so & 'no' or 'n' if not, or press enter to exit\n"+ orange("Enter Response: ")) # allows for alternative to check instance ( returns player to starting room )
-                    if(yesNoAssociation(userDD) and userDD in yesSet):
-                        flagDD = True
-                        print("Please use Deaths Door/Dimension door to return to the starting room, and go east to learn which instance you are in.\n")
-                        break
-                    elif isExitChar(userDD):
-                        exitedInnerLoop = True
-                        break
-                    else:
-                        # initialize all 3 instances and offer them a path to try, if path does not properly get from A to B, then try next instance, and so on.
-                        if firstIteration:
-                            initializeInstance1()
-                            initializeInstance2()
-                            initializeInstance3()
-                        isUnsure = True
-                        break
-        elif isExitChar(userKnowInstance):
-            #check if there was a break within the outter loop or inner loop
-            sys.exit()
-        else:
-            print("\ninvalid input, please try again.")
-            continue
-        if flagDD: # if the user had dimension door, restart the loop because now they should know their instance.
-            continue
+                            isUnsure = True
+                            break
+            elif isExitChar(userKnowInstance):
+                #check if there was a break within the outter loop or inner loop
+                sys.exit()
+            else:
+                print("\ninvalid input, please try again.")
+                continue
+            if flagDD: # if the user had dimension door, restart the loop because now they should know their instance.
+                continue
         while True:
             if(inInstance1):
                 firstIteration = False
@@ -982,7 +986,7 @@ while True:
                 print("\nHere is your path from " + str(startingRoom) + " to " + str(destinationRoom) + "\n") # reiterate to the user their chosen rooms
                 printPath(path) # display path to user
                 while True:
-                    again = input("\nNeed to get to another room? type 'yes' or 'y' if so & 'no' or 'n' if not, or press enter to exit"+ orange("Enter Response: "))
+                    again = input("\nNeed to get to another room? type 'yes' or 'y' if so & 'no' or 'n' if not, or press enter to exit\n"+ orange("Enter Response: "))
                     if(yesNoAssociation(again)):
                         if again in yesSet:
                             break
@@ -1080,7 +1084,6 @@ while True:
                     abrvSet = set(roomsInInstance1) # transform map-form string list into set for element checks
                     stringToObjMap = dict(zip(roomsInInstance1, pointedRoomListInstance1)) # create map
                     print("\n\n[Shadow Crypt " + bold(red("Red")) + " Instance]\n")
-                    
                     for room in pointedRoomListInstance1: # display rooms for user
                         strng = ""
                         roomColor = room.getColor().lower()
@@ -1096,7 +1099,8 @@ while True:
                             strng = bold(str(room))
                         print(strng)
                     while True: # dialogue loop for starting room
-                        raw = input("\nWhich of these rooms are you currently in? (or press enter to exit)\nValid inputs: i.e. gc, rc, yellow maze, etc. s/start for starting room, r/ramp for final room <case insensitive>\n"+ orange("Enter Room: ")) # collect input
+                        roomNotFound = False
+                        raw = input("\nWhich of these rooms are you currently in? (or press enter to exit)\nValid inputs: i.e. gc, rc, yellow maze, etc. s/start for starting room, r/ramp for final room <case insensitive>\nIf you cannot find your room, type 'x'\n"+ orange("Enter Room: ")) # collect input
                         normalized = raw.strip().lower().replace(" ", "") # normalize input
                         startingRoomString = roomTerms(normalized) # check to see if valid room term
                         if startingRoomString in abrvSet: # easy element check from set copy of map-form list
@@ -1104,66 +1108,77 @@ while True:
                             break # break dialogue loop, no more need to continue this query
                         elif isExitChar(raw): # check raw input to see if it is the exit character
                             sys.exit()
+                        if roomNotInTopologyChar(raw):
+                            roomNotFound = True
+                            break
                         else:
                             print("invalid room, please try again\n") # inform the user of the error of their ways
                             continue # restart the while loop
-                    print("\n\n[Shadow Crypt " + bold(red("Red")) + " Instance]\n")
-                    for room in pointedRoomListInstance1: # display rooms for user
-                        strng = ""
-                        roomColor = room.getColor().lower()
-                        if roomColor == "yellow":
-                            strng = yellow(str(room))
-                        elif roomColor == "green":
-                            strng = green(str(room))
-                        elif roomColor == "red":
-                            strng = red(str(room))
-                        elif roomColor == "blue":
-                            strng = blue(str(room))
-                        else:
-                            strng = bold(str(room))
-                        print(strng)
-                    while True: # dialogue loop for destination room
-                        raw = input("\nWhich of these rooms are you trying to reach? (or press enter to exit)\nValid inputs: i.e. gc, rc, yellow maze, etc. s/start for starting room, r/ramp for final room <case insensitive>\n"+ orange("Enter Room: ")) # collect input
-                        normalized = raw.strip().lower().replace(" ", "") # normalize input
-                        destinationRoomString = roomTerms(normalized) # check to see if valid room term
-                        if destinationRoomString in abrvSet: # easy element check from set copy of map-form list
-                            destinationRoom = stringToObjMap.get(destinationRoomString) # because room is mapped to string, easy room retrieval
-                            break # break dialogue loop, no more need to continue this query
-                        elif isExitChar(raw): # check raw input to see if it is the exit character
-                            sys.exit()
-                        else:
-                            print("invalid room, please try again\n") # inform the user of the error of their ways
-                            continue # restart the while loop
-                    path = prioBFS(instance1, startingRoom, destinationRoom) # perform priority BFS, store path as a list
-                    print("\nHere is your path from " + str(startingRoom) + " to " + str(destinationRoom) + "\n") # reiterate to the user their chosen rooms
-                    printPath(path) # display path to user
-                    while True:
-                        workInput = input("\nDid that work? type 'yes' or 'y' if so & 'no' or 'n' if not, or press enter to exit\n"+ orange("Enter Response: "))
-                        if yesNoAssociation(workInput):
-                            if workInput in yesSet:
-                                while True:
-                                    again = input("\nNeed to get to another room? type 'yes' or 'y' if so & 'no' or 'n' if not, or press enter to exit\n"+ orange("Enter Response: "))
-                                    if(yesNoAssociation(again)):
-                                        if again in yesSet:
-                                            break
-                                        else:
-                                            print("Closing Program ... Thank you for using Crypt Router!")
-                                            sys.exit()
-                                    elif isExitChar(again):
-                                        sys.exit()
-                                    else:
-                                        print("invalid response, try again")
-                                        continue
-                                isUnsure = False
-                                inInstance1 = True
+                    if not roomNotFound:
+                        print("\n\n[Shadow Crypt " + bold(red("Red")) + " Instance]\n")
+                        for room in pointedRoomListInstance1: # display rooms for user
+                            strng = ""
+                            roomColor = room.getColor().lower()
+                            if roomColor == "yellow":
+                                strng = yellow(str(room))
+                            elif roomColor == "green":
+                                strng = green(str(room))
+                            elif roomColor == "red":
+                                strng = red(str(room))
+                            elif roomColor == "blue":
+                                strng = blue(str(room))
+                            else:
+                                strng = bold(str(room))
+                            print(strng)
+                        while True: # dialogue loop for destination room
+                            raw = input("\nWhich of these rooms are you trying to reach? (or press enter to exit)\nValid inputs: i.e. gc, rc, yellow maze, etc. s/start for starting room, r/ramp for final room <case insensitive>\nIf you cannot find your room, type 'x'\n"+ orange("Enter Room: ")) # collect input
+                            normalized = raw.strip().lower().replace(" ", "") # normalize input
+                            destinationRoomString = roomTerms(normalized) # check to see if valid room term
+                            if destinationRoomString in abrvSet: # easy element check from set copy of map-form list
+                                destinationRoom = stringToObjMap.get(destinationRoomString) # because room is mapped to string, easy room retrieval
+                                break # break dialogue loop, no more need to continue this query
+                            elif isExitChar(raw): # check raw input to see if it is the exit character
+                                sys.exit()
+                            elif roomNotInTopologyChar(raw):
+                                roomNotFound = True
                                 break
                             else:
-                                break
-                        elif isExitChar(workInput):
-                            sys.exit()
-                        else:
-                            print("\ninvalid response, please try again\n")
-                            continue
+                                print("invalid room, please try again\n") # inform the user of the error of their ways
+                                continue # restart the while loop
+                        if not roomNotFound:
+                            path = prioBFS(instance1, startingRoom, destinationRoom) # perform priority BFS, store path as a list
+                            print("\nHere is your path from " + str(startingRoom) + " to " + str(destinationRoom) + "\n") # reiterate to the user their chosen rooms
+                            printPath(path) # display path to user
+                            while True:
+                                workInput = input("\nDid that work? type 'yes' or 'y' if so & 'no' or 'n' if not, or press enter to exit\n"+ orange("Enter Response: "))
+                                if yesNoAssociation(workInput):
+                                    if workInput in yesSet:
+                                        foundInstance = True
+                                        while True:
+                                            again = input("\nNeed to get to another room? type 'yes' or 'y' if so & 'no' or 'n' if not, or press enter to exit\n"+ orange("Enter Response: "))
+                                            if(yesNoAssociation(again)):
+                                                if again in yesSet:
+                                                    break
+                                                else:
+                                                    print("Closing Program ... Thank you for using Crypt Router!")
+                                                    sys.exit()
+                                            elif isExitChar(again):
+                                                sys.exit()
+                                            else:
+                                                print("invalid response, try again")
+                                                continue
+                                        isUnsure = False
+                                        inInstance1 = True
+                                        break
+                                    else:
+                                        break
+                                elif isExitChar(workInput):
+                                    sys.exit()
+                                else:
+                                    print("\ninvalid response, please try again\n")
+                                    continue
+                    if foundInstance:
+                        break
                     # out of precaution, set variables in scope to none
                     stringToObjMap = None
                     abrvSet = None
@@ -1188,7 +1203,8 @@ while True:
                             strng = bold(str(room))
                         print(strng)
                     while True: # dialogue loop for starting room
-                        raw = input("\nWhich of these rooms are you currently in? (or press enter to exit)\nValid inputs: i.e. gc, rc, yellow maze, etc. s/start for starting room, r/ramp for final room <case insensitive>\n"+ orange("Enter Room: ")) # collect input
+                        roomNotFound = False
+                        raw = input("\nWhich of these rooms are you currently in? (or press enter to exit)\nValid inputs: i.e. gc, rc, yellow maze, etc. s/start for starting room, r/ramp for final room <case insensitive>\nIf you cannot find your room, type 'x'\n"+ orange("Enter Room: ")) # collect input
                         normalized = raw.strip().lower().replace(" ", "") # normalize input
                         startingRoomString = roomTerms(normalized) # check to see if valid room term
                         if startingRoomString in abrvSet: # easy element check from set copy of map-form list
@@ -1196,66 +1212,77 @@ while True:
                             break # break dialogue loop, no more need to continue this query
                         elif isExitChar(raw): # check raw input to see if it is the exit character
                             sys.exit()
+                        elif roomNotInTopologyChar(raw):
+                            roomNotFound = True
+                            break
                         else:
                             print("invalid room, please try again\n") # inform the user of the error of their ways
                             continue # restart the while loop
-                    print("\n\n[Shadow Crypt " + bold(green("Green")) + " Instance]\n")
-                    for room in pointedRoomListInstance2: # display rooms for user
-                        strng = ""
-                        roomColor = room.getColor().lower()
-                        if roomColor == "yellow":
-                            strng = yellow(str(room))
-                        elif roomColor == "green":
-                            strng = green(str(room))
-                        elif roomColor == "red":
-                            strng = red(str(room))
-                        elif roomColor == "blue":
-                            strng = blue(str(room))
-                        else:
-                            strng = bold(str(room))
-                        print(strng)
-                    while True: # dialogue loop for destination room
-                        raw = input("\nWhich of these rooms are you trying to reach? (or press enter to exit)\nValid inputs: i.e. gc, rc, yellow maze, etc. s/start for starting room, r/ramp for final room <case insensitive>\n"+ orange("Enter Room: ")) # collect input
-                        normalized = raw.strip().lower().replace(" ", "") # normalize input
-                        destinationRoomString = roomTerms(normalized) # check to see if valid room term
-                        if destinationRoomString in abrvSet: # easy element check from set copy of map-form list
-                            destinationRoom = stringToObjMap.get(destinationRoomString) # because room is mapped to string, easy room retrieval
-                            break # break dialogue loop, no more need to continue this query
-                        elif isExitChar(raw): # check raw input to see if it is the exit character
-                            sys.exit()
-                        else:
-                            print("invalid room, please try again\n") # inform the user of the error of their ways
-                            continue # restart the while loop
-                    path = prioBFS(instance2, startingRoom, destinationRoom) # perform priority BFS, store path as a list
-                    print("\nHere is your path from " + str(startingRoom) + " to " + str(destinationRoom) + "\n") # reiterate to the user their chosen rooms
-                    printPath(path) # display path to user
-                    while True:
-                        workInput = input("\nDid that work? type 'yes' or 'y' if so & 'no' or 'n' if not, or press enter to exit\n"+ orange("Enter Response: "))
-                        if yesNoAssociation(workInput):
-                            if workInput in yesSet:
-                                while True:
-                                    again = input("\nNeed to get to another room? type 'yes' or 'y' if so & 'no' or 'n' if not, or press enter to exit\n"+ orange("Enter Response: "))
-                                    if(yesNoAssociation(again)):
-                                        if again in yesSet:
-                                            break
-                                        else:
-                                            print("Closing Program ... Thank you for using Crypt Router!")
-                                            sys.exit()
-                                    elif isExitChar(again):
-                                        sys.exit()
-                                    else:
-                                        print("invalid response, try again")
-                                        continue
-                                isUnsure = False
-                                inInstance2 = True
+                    if not roomNotFound:
+                        print("\n\n[Shadow Crypt " + bold(green("Green")) + " Instance]\n")
+                        for room in pointedRoomListInstance2: # display rooms for user
+                            strng = ""
+                            roomColor = room.getColor().lower()
+                            if roomColor == "yellow":
+                                strng = yellow(str(room))
+                            elif roomColor == "green":
+                                strng = green(str(room))
+                            elif roomColor == "red":
+                                strng = red(str(room))
+                            elif roomColor == "blue":
+                                strng = blue(str(room))
+                            else:
+                                strng = bold(str(room))
+                            print(strng)
+                        while True: # dialogue loop for destination room
+                            raw = input("\nWhich of these rooms are you trying to reach? (or press enter to exit)\nValid inputs: i.e. gc, rc, yellow maze, etc. s/start for starting room, r/ramp for final room <case insensitive>\nIf you cannot find your room, type 'x'\n"+ orange("Enter Room: ")) # collect input
+                            normalized = raw.strip().lower().replace(" ", "") # normalize input
+                            destinationRoomString = roomTerms(normalized) # check to see if valid room term
+                            if destinationRoomString in abrvSet: # easy element check from set copy of map-form list
+                                destinationRoom = stringToObjMap.get(destinationRoomString) # because room is mapped to string, easy room retrieval
+                                break # break dialogue loop, no more need to continue this query
+                            elif isExitChar(raw): # check raw input to see if it is the exit character
+                                sys.exit()
+                            elif roomNotInTopologyChar(raw):
+                                roomNotFound = True
                                 break
                             else:
-                                break
-                        elif isExitChar(workInput):
-                            sys.exit()
-                        else:
-                            print("\ninvalid response, please try again\n")
-                            continue
+                                print("invalid room, please try again\n") # inform the user of the error of their ways
+                                continue # restart the while loop
+                        if not roomNotFound:
+                            path = prioBFS(instance2, startingRoom, destinationRoom) # perform priority BFS, store path as a list
+                            print("\nHere is your path from " + str(startingRoom) + " to " + str(destinationRoom) + "\n") # reiterate to the user their chosen rooms
+                            printPath(path) # display path to user
+                            while True:
+                                workInput = input("\nDid that work? type 'yes' or 'y' if so & 'no' or 'n' if not, or press enter to exit\n"+ orange("Enter Response: "))
+                                if yesNoAssociation(workInput):
+                                    if workInput in yesSet:
+                                        foundInstance = True
+                                        while True:
+                                            again = input("\nNeed to get to another room? type 'yes' or 'y' if so & 'no' or 'n' if not, or press enter to exit\n"+ orange("Enter Response: "))
+                                            if(yesNoAssociation(again)):
+                                                if again in yesSet:
+                                                    break
+                                                else:
+                                                    print("Closing Program ... Thank you for using Crypt Router!")
+                                                    sys.exit()
+                                            elif isExitChar(again):
+                                                sys.exit()
+                                            else:
+                                                print("invalid response, try again")
+                                                continue
+                                        isUnsure = False
+                                        inInstance2 = True
+                                        break
+                                    else:
+                                        break
+                                elif isExitChar(workInput):
+                                    sys.exit()
+                                else:
+                                    print("\ninvalid response, please try again\n")
+                                    continue
+                    if foundInstance:
+                        break
                     # out of precaution, set variables in scope to none
                     stringToObjMap = None
                     abrvSet = None
@@ -1280,7 +1307,8 @@ while True:
                             strng = bold(str(room))
                         print(strng)
                     while True: # dialogue loop for starting room
-                        raw = input("\nWhich of these rooms are you currently in? (or press enter to exit)\nValid inputs: i.e. gc, rc, yellow maze, etc. s/start for starting room, r/ramp for final room <case insensitive>\n"+ orange("Enter Room: ")) # collect input
+                        roomNotFound = False
+                        raw = input("\nWhich of these rooms are you currently in? (or press enter to exit)\nValid inputs: i.e. gc, rc, yellow maze, etc. s/start for starting room, r/ramp for final room <case insensitive>\nIf you cannot find your room, type 'x'\n"+ orange("Enter Room: ")) # collect input
                         normalized = raw.strip().lower().replace(" ", "") # normalize input
                         startingRoomString = roomTerms(normalized) # check to see if valid room term
                         if startingRoomString in abrvSet: # easy element check from set copy of map-form list
@@ -1288,69 +1316,82 @@ while True:
                             break # break dialogue loop, no more need to continue this query
                         elif isExitChar(raw): # check raw input to see if it is the exit character
                             sys.exit()
+                        elif roomNotInTopologyChar(raw):
+                            roomNotFound = True
+                            isUnsure = False
+                            wasUnsure = True
+                            break
                         else:
                             print("invalid room, please try again\n") # inform the user of the error of their ways
                             continue # restart the while loop
-                    print("\n\n[Shadow Crypt " + bold(blue("Blue")) + " Instance]\n")
-                    for room in pointedRoomListInstance3: # display rooms for user
-                        strng = ""
-                        roomColor = room.getColor().lower()
-                        if roomColor == "yellow":
-                            strng = yellow(str(room))
-                        elif roomColor == "green":
-                            strng = green(str(room))
-                        elif roomColor == "red":
-                            strng = red(str(room))
-                        elif roomColor == "blue":
-                            strng = blue(str(room))
-                        else:
-                            strng = bold(str(room))
-                        print(strng)
-                    while True: # dialogue loop for destination room
-                        raw = input("\nWhich of these rooms are you trying to reach? (or press enter to exit)\nValid inputs: i.e. gc, rc, yellow maze, etc. s/start for starting room, r/ramp for final room <case insensitive>\n"+ orange("Enter Room: ")) # collect input
-                        normalized = raw.strip().lower().replace(" ", "") # normalize input
-                        destinationRoomString = roomTerms(normalized) # check to see if valid room term
-                        if destinationRoomString in abrvSet: # easy element check from set copy of map-form list
-                            destinationRoom = stringToObjMap.get(destinationRoomString) # because room is mapped to string, easy room retrieval
-                            break # break dialogue loop, no more need to continue this query
-                        elif isExitChar(raw): # check raw input to see if it is the exit character
-                            sys.exit()
-                        else:
-                            print("invalid room, please try again\n") # inform the user of the error of their ways
-                            continue # restart the while loop
-                    path = prioBFS(instance3, startingRoom, destinationRoom) # perform priority BFS, store path as a list
-                    print("\nHere is your path from " + str(startingRoom) + " to " + str(destinationRoom) + "\n") # reiterate to the user their chosen rooms
-                    printPath(path) # display path to user
-                    while True:
-                        workInput = input("\nDid that work? type 'yes' or 'y' if so & 'no' or 'n' if not, or press enter to exit\n"+ orange("Enter Response: "))
-                        if yesNoAssociation(workInput):
-                            if workInput in yesSet:
-                                while True:
-                                    again = input("\nNeed to get to another room? type 'yes' or 'y' if so & 'no' or 'n' if not, or press enter to exit\n"+ orange("Enter Response: "))
-                                    if(yesNoAssociation(again)):
-                                        if again in yesSet:
-                                            break
-                                        else:
-                                            print("Closing Program ... Thank you for using Crypt Router!")
-                                            sys.exit()
-                                    elif isExitChar(again):
-                                        sys.exit()
-                                    else:
-                                        print("invalid response, try again")
-                                        continue
-                                isUnsure = False
-                                inInstance3 = True
-                                break
+                    if not roomNotFound:
+                        print("\n\n[Shadow Crypt " + bold(blue("Blue")) + " Instance]\n")
+                        for room in pointedRoomListInstance3: # display rooms for user
+                            strng = ""
+                            roomColor = room.getColor().lower()
+                            if roomColor == "yellow":
+                                strng = yellow(str(room))
+                            elif roomColor == "green":
+                                strng = green(str(room))
+                            elif roomColor == "red":
+                                strng = red(str(room))
+                            elif roomColor == "blue":
+                                strng = blue(str(room))
                             else:
+                                strng = bold(str(room))
+                            print(strng)
+                        while True: # dialogue loop for destination room
+                            raw = input("\nWhich of these rooms are you trying to reach? (or press enter to exit)\nValid inputs: i.e. gc, rc, yellow maze, etc. s/start for starting room, r/ramp for final room <case insensitive>\nIf you cannot find your room, type 'x'\n"+ orange("Enter Room: ")) # collect input
+                            normalized = raw.strip().lower().replace(" ", "") # normalize input
+                            destinationRoomString = roomTerms(normalized) # check to see if valid room term
+                            if destinationRoomString in abrvSet: # easy element check from set copy of map-form list
+                                destinationRoom = stringToObjMap.get(destinationRoomString) # because room is mapped to string, easy room retrieval
+                                break # break dialogue loop, no more need to continue this query
+                            elif isExitChar(raw): # check raw input to see if it is the exit character
+                                sys.exit()
+                            elif roomNotInTopologyChar(raw):
+                                roomNotFound = True
                                 isUnsure = False
                                 wasUnsure = True
                                 break
-                        elif isExitChar(workInput):
-                            sys.exit()
-                        else:
-                            print("\ninvalid response, please try again\n")
-                            continue
-                break
+                            else:
+                                print("invalid room, please try again\n") # inform the user of the error of their ways
+                                continue # restart the while loop
+                        if not roomNotFound:
+                            path = prioBFS(instance3, startingRoom, destinationRoom) # perform priority BFS, store path as a list
+                            print("\nHere is your path from " + str(startingRoom) + " to " + str(destinationRoom) + "\n") # reiterate to the user their chosen rooms
+                            printPath(path) # display path to user
+                            while True:
+                                workInput = input("\nDid that work? type 'yes' or 'y' if so & 'no' or 'n' if not, or press enter to exit\n"+ orange("Enter Response: "))
+                                if yesNoAssociation(workInput):
+                                    if workInput in yesSet:
+                                        foundInstance = True
+                                        while True:
+                                            again = input("\nNeed to get to another room? type 'yes' or 'y' if so & 'no' or 'n' if not, or press enter to exit\n"+ orange("Enter Response: "))
+                                            if(yesNoAssociation(again)):
+                                                if again in yesSet:
+                                                    break
+                                                else:
+                                                    print("Closing Program ... Thank you for using Crypt Router!")
+                                                    sys.exit()
+                                            elif isExitChar(again):
+                                                sys.exit()
+                                            else:
+                                                print("invalid response, try again")
+                                                continue
+                                        isUnsure = False
+                                        inInstance3 = True
+                                        break
+                                    else:
+                                        isUnsure = False
+                                        wasUnsure = True
+                                        break
+                                elif isExitChar(workInput):
+                                    sys.exit()
+                                else:
+                                    print("\ninvalid response, please try again\n")
+                                    continue
+            break
         if wasUnsure:
             print("\nI'm sorry that didn't work.")
             while True:
